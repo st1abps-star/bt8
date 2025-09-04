@@ -45,11 +45,14 @@ const PortfolioSection = () => {
   const allVideos = [...teasers, ...highlights]
 
   useEffect(() => {
+    // ✅ Apply scale before animation
+    gsap.set(trackRef.current, { scale: 0.6, transformOrigin: "center" })
+
     // Infinite marquee scroll effect
     gsap.to(trackRef.current, {
-      xPercent: -50, // move half its width
+      xPercent: -50,
       repeat: -1,
-      duration: 40, // adjust speed
+      duration: 40,
       ease: "linear"
     })
   }, [])
@@ -75,11 +78,10 @@ const PortfolioSection = () => {
         <div className="portfolio-showcase space-y-12 sm:space-y-16 lg:space-y-20">
           
           {/* Moving Video Track */}
-          <div className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl bg-pattern-dots">
+          <div className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl bg-pattern-dots flex justify-center">
             <div
               ref={trackRef}
-              className="flex gap-2 sm:gap-3 lg:gap-4 xl:gap-6 w-[200%] py-2 sm:py-3 lg:py-4 scale-[0.6] origin-center"
-              // 🔹 scale-[0.6] shrinks whole stack to 60% (≈40% smaller)
+              className="flex gap-2 sm:gap-3 lg:gap-4 xl:gap-6 w-[200%] py-2 sm:py-3 lg:py-4"
             >
               {[...allVideos, ...allVideos].map((video, index) => (
                 <div 
