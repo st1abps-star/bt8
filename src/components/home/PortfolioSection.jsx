@@ -78,7 +78,8 @@ const PortfolioSection = () => {
           <div className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl bg-pattern-dots">
             <div
               ref={trackRef}
-              className="flex gap-4 sm:gap-6 lg:gap-8 xl:gap-12 w-[200%] py-4 sm:py-6 lg:py-8" // doubled width for seamless loop
+              className="flex gap-2 sm:gap-3 lg:gap-4 xl:gap-6 w-[200%] py-2 sm:py-3 lg:py-4 scale-[0.6] origin-center"
+              // 🔹 scale-[0.6] shrinks whole stack to 60% (≈40% smaller)
             >
               {[...allVideos, ...allVideos].map((video, index) => (
                 <div 
