@@ -83,7 +83,7 @@ const PortfolioSection = () => {
               {[...allVideos, ...allVideos].map((video, index) => (
                 <div 
                   key={index}
-                  className="video-card flex-shrink-0 w-32 sm:w-36 lg:w-40 xl:w-44 video-glass gpu-accelerated"
+                  className="video-card flex-shrink-0 w-20 sm:w-24 lg:w-28 xl:w-32 video-glass gpu-accelerated"
                 >
                   <div className="relative aspect-video bg-black rounded-lg sm:rounded-xl overflow-hidden">
                     <iframe
