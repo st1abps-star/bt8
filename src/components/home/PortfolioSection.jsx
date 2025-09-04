@@ -1,78 +1,225 @@
-// components/home/PortfolioSection.jsx
-"use client";
+@echo off
+title ContactScraper launcher (safe venv recreate + run)
+cd /d "%~dp0"
+setlocal enabledelayedexpansion
 
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+echo ======================================
+echo  🚀 ContactScraper Launcher (v2)
+echo ======================================
 
-gsap.registerPlugin(ScrollTrigger);
+REM ---------- Find a Python 3.11 executable ----------
+set "PYLAUNCH="
+for /f "usebackq delims=" %%A in (`py -3.11 --version 2^>nul`) do set "PYVER=%%A"
+if defined PYVER (
+    set "PYLAUNCH=py -3.11"
+) else (
+    for /f "usebackq delims=" %%A in (`python --version 2^>nul`) do set "PYVER=%%A"
+    if defined PYVER (
+        set "PYLAUNCH=python"
+    )
+)
 
-const VideoStack = ({ videos }) => {
-  const containerRef = useRef(null);
+if not defined PYLAUNCH (
+    echo ERROR: No Python interpreter found. Install Python 3.11 and ensure 'py' or 'python' is on PATH.
+    pause
+    exit /b 1
+)
+
+echo Detected: %PYVER% (will use: %PYLAUNCH%)
+
+REM ---------- Check it's Python 3.11 ----------
+echo %PYVER% | findstr /c:"3.11." >nul
+if errorlevel 1 (
+    echo ERROR: The detected Python is not 3.11.x. Please install Python 3.11 and try again.
+    echo Detected version: %PYVER%
+    pause
+    exit /b 2
+)
+
+REM ---------- Remove old venv to avoid stale Python binding ----------
+if exist venv (
+    echo [*] Removing old virtual environment...
+    rmdir /s /q venv
+)
+
+REM ---------- Create fresh venv with Python 3.11 ----------
+echo [*] Creating virtual environment with %PYLAUNCH%...
+%PYLAUNCH% -m venv venv
+if errorlevel 1 (
+    echo ERROR: Failed to create virtualenv with %PYLAUNCH%.
+    pause
+    exit /b 3
+)
+
+REM ---------- Activate venv ----------
+call venv\Scripts\activate.bat
+if errorlevel 1 (
+    echo ERROR: Failed to activate virtual environment.
+    pause
+    exit /b 4
+)
+
+REM ---------- Upgrade pip ----------
+echo [*] Upgrading pip...
+python -m pip install --upgrade pip setuptools wheel
+
+REM ---------- Install dependencies ----------
+if not exist requirements.txt (
+    echo ERROR: requirements.txt not found in %cd%.
+    pause
+    exit /b 5
+)
+echo [*] Installing dependencies from requirements.txt...
+pip install -r requirements.txt
+if errorlevel 1 (
+    echo ERROR: pip install failed. See output above.
+    pause
+    exit /b 6
+)
+
+REM ---------- Install Playwright browsers ----------
+echo [*] Installing Playwright browsers (Chromium)...
+playwright install chromium
+if errorlevel 1 (
+    echo ERROR: playwright install failed. See output above.
+    pause
+    exit /b 7
+)
+
+REM ---------- Final: run Streamlit GUI ----------
+echo [*] Launching Streamlit GUI...
+start http://localhost:8501
+streamlit run gui.py
+
+echo Done.
+pause
+endlocal
+
+
+
+
+PORFOLIO SECTION:
+import React, { useRef, useEffect } from 'react'
+import gsap from 'gsap'
+import { Link } from 'react-router-dom'
+
+// 🔹 Video data (same as your Projects page)
+const teasers = [
+  { videoId: 'dQw4w9WgXcQ' },
+  { videoId: 'jNQXAC9IVRw' },
+  { videoId: 'M7lc1UVf-VE' },
+  { videoId: 'ZZ5LpwO-An4' },
+  { videoId: 'kJQP7kiw5Fk' },
+  { videoId: 'tgbNymZ7vqY' },
+  { videoId: 'L_jWHffIx5E' },
+  { videoId: 'fJ9rUzIMcZQ' },
+  { videoId: 'QH2-TGUlwu4' },
+  { videoId: 'nfWlot6h_JM' },
+  { videoId: 'hFZFjoX2cGg' }
+]
+
+const highlights = [
+  { videoId: 'ScMzIvxBSi4' },
+  { videoId: 'CevxZvSJLk8' },
+  { videoId: 'kffacxfA7G4' },
+  { videoId: 'qeMFqkcPYcg' },
+  { videoId: 'SQoA_wjmE9w' },
+  { videoId: 'ZbZSe6N_BXs' },
+  { videoId: 'HEXWRTEbj1I' },
+  { videoId: 'U9t-slLl69E' },
+  { videoId: 'iik25wqIuFo' },
+  { videoId: 'C0DPdy98e4c' },
+  { videoId: 'YQHsXMglC9A' },
+  { videoId: 'AdUw5RdyZxI' },
+  { videoId: 'hTWKbfoikeg' },
+  { videoId: 'NUYvbT6vTPs' },
+  { videoId: 'RgKAFK5djSk' },
+  { videoId: 'uelHwf8o7_U' },
+  { videoId: 'EhxJLojIE_o' },
+  { videoId: 'KQ6zr6kCPj8' },
+  { videoId: 'MtN1YnoL46Q' },
+  { videoId: 'sOnqjkJTMaA' }
+]
+
+const PortfolioSection = () => {
+  const trackRef = useRef(null)
+  const allVideos = [...teasers, ...highlights]
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    // ✅ Apply scale before animation
+    gsap.set(trackRef.current, { scale: 0.8, transformOrigin: "center" })
 
-    // Smooth scroll animation
-    gsap.to(container.children, {
-      yPercent: -20 * (videos.length - 1), // stack moves up
-      ease: "none",
-      scrollTrigger: {
-        trigger: container,
-        start: "top center",
-        end: "bottom top",
-        scrub: 1.2, // adjust for smoother "FPS" feel
-      },
-    });
-
-    // Intersection Observer to autoplay videos when section is visible
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const iframes = entry.target.querySelectorAll("iframe");
-          if (entry.isIntersecting) {
-            iframes.forEach((iframe) => {
-              iframe.contentWindow?.postMessage(
-                '{"event":"command","func":"playVideo","args":""}',
-                "*"
-              );
-            });
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    if (container) observer.observe(container);
-
-    return () => observer.disconnect();
-  }, [videos]);
+    // Infinite marquee scroll effect
+    gsap.to(trackRef.current, {
+      xPercent: -50,
+      repeat: -1,
+      duration: 20,
+      ease: "linear"
+    })
+  }, [])
 
   return (
-    <div
-      ref={containerRef}
-      className="video-stack-section relative w-full max-w-4xl mx-auto space-y-6"
-      style={{ perspective: "1000px" }}
+    <section
+      id="portfolio"
+      className="min-h-screen section-dark-alt text-white relative depth-3 overflow-hidden section-transition"
     >
-      {videos.map((video, idx) => (
-        <div
-          key={idx}
-          className="video-card rounded-xl overflow-hidden shadow-lg"
-          style={{ height: "300px" }}
-        >
-          <iframe
-            width="100%"
-            height="100%"
-            src={`https://www.youtube.com/embed/${video.videoId}?enablejsapi=1&autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&playsinline=1&showinfo=0`}
-            allow="autoplay; encrypted-media"
-            frameBorder="0"
-            allowFullScreen
-          ></iframe>
+      <div className="cinematic-overlay"></div>
+      <div className="container mx-auto section-padding">
+        <div className="text-center component-margin space-y-4 sm:space-y-6 lg:space-y-8">
+          <h2 className="font-[font2] heading-responsive-xl uppercase mb-4 sm:mb-6 lg:mb-8 leading-tight text-layer-3 text-glow">
+            Our Portfolio
+          </h2>
+          <div className="floating-panel-dark max-width-content">
+            <p className="font-[font1] text-responsive leading-relaxed text-layer-2">
+              Découvrez notre collection de films de mariage cinématographiques
+            </p>
+          </div>
         </div>
-      ))}
-    </div>
-  );
-};
 
-export default VideoStack;
+        <div className="portfolio-showcase space-y-12 sm:space-y-16 lg:space-y-20">
+          
+          {/* Moving Video Track */}
+          <div className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl bg-pattern-dots flex justify-center">
+            <div
+              ref={trackRef}
+              className="flex gap-2 sm:gap-3 lg:gap-4 xl:gap-6 w-[200%] py-2 sm:py-3 lg:py-4"
+            >
+              {[...allVideos, ...allVideos].map((video, index) => (
+                <div 
+                  key={index}
+                  className="video-card flex-shrink-0 w-20 sm:w-24 lg:w-28 xl:w-32 video-glass gpu-accelerated"
+                >
+                  <div className="relative aspect-video bg-black rounded-lg sm:rounded-xl overflow-hidden">
+                    <iframe
+                      className="absolute top-0 left-0 w-full h-full"
+                      src={`https://www.youtube.com/embed/${video.videoId}?autoplay=0&mute=1&controls=1&modestbranding=1&rel=0&showinfo=0`}
+                      title={`Portfolio video ${index + 1}`}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Portfolio Button */}
+          <div className="text-center">
+            <Link 
+              to="/projects"
+              className="btn-pill btn-primary h-12 sm:h-16 lg:h-20 px-8 sm:px-12 lg:px-16 inline-flex items-center justify-center group"
+            >
+              <span className="font-[font2] text-base sm:text-xl lg:text-2xl">
+                View Our Portfolio
+              </span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export default PortfolioSection
