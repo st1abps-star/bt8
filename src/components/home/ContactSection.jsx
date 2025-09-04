@@ -46,13 +46,13 @@ const PortfolioSection = () => {
 
   useEffect(() => {
     // ✅ Apply scale before animation
-    gsap.set(trackRef.current, { scale: 0.8, transformOrigin: "center" })
+    gsap.set(trackRef.current, { scale: 0.6, transformOrigin: "center" })
 
     // Infinite marquee scroll effect
     gsap.to(trackRef.current, {
       xPercent: -50,
       repeat: -1,
-      duration: 20,
+      duration: 40,
       ease: "linear"
     })
   }, [])
