@@ -1,4 +1,4 @@
-// components/VideoStack.tsx
+// components/home/PortfolioSection.jsx
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -7,12 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface VideoStackProps {
-  videos: { videoId: string; title: string }[];
-}
-
-const VideoStack: React.FC<VideoStackProps> = ({ videos }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+const VideoStack = ({ videos }) => {
+  const containerRef = useRef(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -26,7 +22,7 @@ const VideoStack: React.FC<VideoStackProps> = ({ videos }) => {
         trigger: container,
         start: "top center",
         end: "bottom top",
-        scrub: 1.2, // smooth scrubbing, adjust for "FPS-like" feel
+        scrub: 1.2, // adjust for smoother "FPS" feel
       },
     });
 
@@ -34,9 +30,7 @@ const VideoStack: React.FC<VideoStackProps> = ({ videos }) => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          const iframes = entry.target.querySelectorAll<HTMLIFrameElement>(
-            "iframe"
-          );
+          const iframes = entry.target.querySelectorAll("iframe");
           if (entry.isIntersecting) {
             iframes.forEach((iframe) => {
               iframe.contentWindow?.postMessage(
@@ -59,7 +53,7 @@ const VideoStack: React.FC<VideoStackProps> = ({ videos }) => {
     <div
       ref={containerRef}
       className="video-stack-section relative w-full max-w-4xl mx-auto space-y-6"
-      style={{ perspective: "1000px" }} // optional for 3D effect
+      style={{ perspective: "1000px" }}
     >
       {videos.map((video, idx) => (
         <div
