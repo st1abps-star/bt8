@@ -52,7 +52,7 @@ const PortfolioSection = () => {
     gsap.to(trackRef.current, {
       xPercent: -50,
       repeat: -1,
-      duration: 25,
+      duration: 20,
       ease: "linear"
     })
   }, [])
